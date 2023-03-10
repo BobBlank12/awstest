@@ -167,3 +167,10 @@ aws ec2 create-internet-gateway --tag-specifications 'ResourceType=internet-gate
 #    }
 #}
 
+# Attach the internet gateway IGW to the VPC
+#https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/attach-internet-gateway.html
+
+aws ec2 attach-internet-gateway --internet-gateway-id igw-0cad51f0b9945cbf4 --vpc-id vpc-02645ba38f23e937d
+
+#NO RESPONSE from output of command above!
+
