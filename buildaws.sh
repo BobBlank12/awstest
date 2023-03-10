@@ -35,13 +35,7 @@ aws ec2 create-vpc --cidr-block 11.0.0.0/16 --tag-specifications 'ResourceType=v
 # Enable dns-hostnames on the new VPC
 aws ec2 modify-vpc-attribute --vpc-id vpc-02645ba38f23e937d --enable-dns-hostnames '{"Value":true}'
 
-#Sample code to create the S3 Endpoint Gateway
-# Decision - should I create the routetable first, so I can include it here... 
-# but I don't even have the subnet defined yet...?
-#aws ec2 create-vpc-endpoint \
-#    --vpc-id vpc-1a2b3c4d \
-#    --service-name com.amazonaws.us-east-1.s3 \
-#    --route-table-ids rtb-11aa22bb
+#Create the S3 Endpoint Gateway
 
 aws ec2 create-vpc-endpoint --vpc-id vpc-02645ba38f23e937d --service-name com.amazonaws.us-east-2.s3
 
@@ -64,3 +58,95 @@ aws ec2 create-vpc-endpoint --vpc-id vpc-02645ba38f23e937d --service-name com.am
 #        "OwnerId": "980075630834"
 #    }
 #}
+
+#Subnet creation call - this will be my public subnet
+
+aws ec2 create-subnet --vpc-id vpc-02645ba38f23e937d --cidr-block 11.0.0.0/20 --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=dev2-subnet-public1-us-east-2a}]'
+
+#{
+#    "Subnet": {
+#        "AvailabilityZone": "us-east-2a",
+#        "AvailabilityZoneId": "use2-az1",
+#        "AvailableIpAddressCount": 4091,
+#        "CidrBlock": "11.0.0.0/20",
+#        "DefaultForAz": false,
+#        "MapPublicIpOnLaunch": false,
+#        "State": "available",
+#        "SubnetId": "subnet-0b37af2257c044351",
+#        "VpcId": "vpc-02645ba38f23e937d",
+#        "OwnerId": "980075630834",
+#        "AssignIpv6AddressOnCreation": false,
+#        "Ipv6CidrBlockAssociationSet": [],
+#        "Tags": [
+#            {
+#                "Key": "Name",
+#                "Value": "dev2-subnet-public1-us-east-2a"
+#            }
+#        ],
+#        "SubnetArn": "arn:aws:ec2:us-east-2:980075630834:subnet/subnet-0b37af2257c044351",
+#:...skipping...
+#{
+#    "Subnet": {
+#        "AvailabilityZone": "us-east-2a",
+#        "AvailabilityZoneId": "use2-az1",
+#        "AvailableIpAddressCount": 4091,
+#        "CidrBlock": "11.0.0.0/20",
+#        "DefaultForAz": false,
+#        "MapPublicIpOnLaunch": false,
+#        "State": "available",
+#        "SubnetId": "subnet-0b37af2257c044351",
+#        "VpcId": "vpc-02645ba38f23e937d",
+#        "OwnerId": "980075630834",
+#        "AssignIpv6AddressOnCreation": false,
+#        "Ipv6CidrBlockAssociationSet": [],
+#        "Tags": [
+#            {
+#                "Key": "Name",
+#                "Value": "dev2-subnet-public1-us-east-2a"
+#            }
+#        ],
+#        "SubnetArn": "arn:aws:ec2:us-east-2:980075630834:subnet/subnet-0b37af2257c044351",
+#        "EnableDns64": false,
+#        "Ipv6Native": false,
+#        "PrivateDnsNameOptionsOnLaunch": {
+#            "HostnameType": "ip-name",
+#            "EnableResourceNameDnsARecord": false,
+#            "EnableResourceNameDnsAAAARecord": false
+#        }
+#    }
+#}
+
+#Subnet creation call - this will be my private subnet
+
+#aws ec2 create-subnet --vpc-id vpc-02645ba38f23e937d --cidr-block 11.0.128.0/20 --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=dev2-subnet-private1-us-east-2a}]'
+
+#   "Subnet": {
+#        "AvailabilityZone": "us-east-2a",
+#        "AvailabilityZoneId": "use2-az1",
+#        "AvailableIpAddressCount": 4091,
+#        "CidrBlock": "11.0.128.0/20",
+#        "DefaultForAz": false,
+#        "MapPublicIpOnLaunch": false,
+#        "State": "available",
+#        "SubnetId": "subnet-082b99b23b33626d4",
+#        "VpcId": "vpc-02645ba38f23e937d",
+#        "OwnerId": "980075630834",
+#        "AssignIpv6AddressOnCreation": false,
+#        "Ipv6CidrBlockAssociationSet": [],
+#        "Tags": [
+#            {
+#                "Key": "Name",
+#                "Value": "dev2-subnet-private1-us-east-2a"
+#            }
+#        ],
+#        "SubnetArn": "arn:aws:ec2:us-east-2:980075630834:subnet/subnet-082b99b23b33626d4",
+#        "EnableDns64": false,
+#        "Ipv6Native": false,
+#        "PrivateDnsNameOptionsOnLaunch": {
+#            "HostnameType": "ip-name",
+#            "EnableResourceNameDnsARecord": false,
+#            "EnableResourceNameDnsAAAARecord": false
+#        }
+#    }
+#}
+
