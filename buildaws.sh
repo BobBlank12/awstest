@@ -43,3 +43,24 @@ aws ec2 modify-vpc-attribute --vpc-id vpc-02645ba38f23e937d --enable-dns-hostnam
 #    --service-name com.amazonaws.us-east-1.s3 \
 #    --route-table-ids rtb-11aa22bb
 
+aws ec2 create-vpc-endpoint --vpc-id vpc-02645ba38f23e937d --service-name com.amazonaws.us-east-2.s3
+
+#{
+#    "VpcEndpoint": {
+#        "VpcEndpointId": "vpce-0576cb44998524c8e",
+#        "VpcEndpointType": "Gateway",
+#        "VpcId": "vpc-02645ba38f23e937d",
+#        "ServiceName": "com.amazonaws.us-east-2.s3",
+#        "State": "available",
+#        "PolicyDocument": "{\"Version\":\"2008-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":\"*\",\"Resource\":\"*\"}]}",
+#        "RouteTableIds": [],
+#        "SubnetIds": [],
+#        "Groups": [],
+#        "PrivateDnsEnabled": false,
+#        "RequesterManaged": false,
+#        "NetworkInterfaceIds": [],
+#        "DnsEntries": [],
+#        "CreationTimestamp": "2023-03-10T16:53:51+00:00",
+#        "OwnerId": "980075630834"
+#    }
+#}
