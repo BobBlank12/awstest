@@ -174,3 +174,74 @@ aws ec2 attach-internet-gateway --internet-gateway-id igw-0cad51f0b9945cbf4 --vp
 
 #NO RESPONSE from output of command above!
 
+#Create a route table to be used by the public subnet
+aws ec2 create-route-table --vpc-id vpc-02645ba38f23e937d
+
+#{
+#    "RouteTable": {
+#        "Associations": [],
+#        "PropagatingVgws": [],
+#        "RouteTableId": "rtb-0d1d7b6f7219a66bb",
+#        "Routes": [
+#            {
+#                "DestinationCidrBlock": "11.0.0.0/16",
+#                "GatewayId": "local",
+#                "Origin": "CreateRouteTable",
+#                "State": "active"
+#            }
+#        ],
+#        "Tags": [],
+#        "VpcId": "vpc-02645ba38f23e937d",
+#        "OwnerId": "980075630834"
+#    }
+#}
+
+
+# Create (add) the route to the route table for all traffic to go to the IGW
+aws ec2 create-route --route-table-id rtb-0d1d7b6f7219a66bb --destination-cidr-block 0.0.0.0/0 --gateway-id igw-0cad51f0b9945cbf4
+
+#{
+#    "Return": true
+#}
+
+#Associate the route with the public subnet
+aws ec2 associate-route-table --route-table-id rtb-0d1d7b6f7219a66bb --subnet-id subnet-0b37af2257c044351
+
+#{
+#    "AssociationId": "rtbassoc-05d15619eddd55073",
+#    "AssociationState": {
+#        "State": "associated"
+#    }
+#}
+
+#Create a route table to be used by the private subnet
+aws ec2 create-route-table --vpc-id vpc-02645ba38f23e937d
+
+#{
+#    "RouteTable": {
+#        "Associations": [],
+#        "PropagatingVgws": [],
+#        "RouteTableId": "rtb-02999a7044e057013",
+#        "Routes": [
+#            {
+#                "DestinationCidrBlock": "11.0.0.0/16",
+#                "GatewayId": "local",
+#                "Origin": "CreateRouteTable",
+#                "State": "active"
+#            }
+#        ],
+#        "Tags": [],
+#        "VpcId": "vpc-02645ba38f23e937d",
+#        "OwnerId": "980075630834"
+#    }
+#}
+
+#Associate the route with the private subnet
+aws ec2 associate-route-table --route-table-id rtb-02999a7044e057013 --subnet-id subnet-082b99b23b33626d4
+
+#{
+#    "AssociationId": "rtbassoc-012af6a572584f2af",
+#    "AssociationState": {
+#        "State": "associated"
+#    }
+#}
