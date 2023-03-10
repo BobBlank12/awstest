@@ -32,16 +32,54 @@ aws ec2 create-vpc --cidr-block 11.0.0.0/16 --tag-specifications 'ResourceType=v
 #    }
 #}
 
+#Describe the main route table of the new VPC so we can get its ID and tag it with a name
+aws ec2 describe-route-tables --filters "Name=association.main,Values=true" "Name=vpc-id,Values=vpc-02645ba38f23e937d"
+
+#{
+#    "RouteTables": [
+#        {
+#            "Associations": [
+#                {
+#                    "Main": true,
+#                    "RouteTableAssociationId": "rtbassoc-0cc261b859befa7fb",
+#                    "RouteTableId": "rtb-0fcd646f9ecbeb825",
+#                    "AssociationState": {
+#                        "State": "associated"
+#                    }
+#                }
+#            ],
+#            "PropagatingVgws": [],
+#            "RouteTableId": "rtb-0fcd646f9ecbeb825",
+#            "Routes": [
+#                {
+#                    "DestinationCidrBlock": "11.0.0.0/16",
+#                    "GatewayId": "local",
+#                    "Origin": "CreateRouteTable",
+#                    "State": "active"
+#                }
+#            ],
+#            "Tags": [],
+#            "VpcId": "vpc-02645ba38f23e937d",
+#            "OwnerId": "980075630834"
+#        }
+#    ]
+#}
+
+#Add a name tag to the default main route table for the VPC
+aws ec2 create-tags --resources rtb-0fcd646f9ecbeb825 --tags Key=Name,Value=dev2-rtb-main
+
+#No output from the above command
+
 # Enable dns-hostnames on the new VPC
 aws ec2 modify-vpc-attribute --vpc-id vpc-02645ba38f23e937d --enable-dns-hostnames '{"Value":true}'
 
 #Create the S3 Endpoint Gateway
 
-aws ec2 create-vpc-endpoint --vpc-id vpc-02645ba38f23e937d --service-name com.amazonaws.us-east-2.s3
+aws ec2 create-vpc-endpoint --vpc-id vpc-02645ba38f23e937d --service-name com.amazonaws.us-east-2.s3 --tag-specifications 'ResourceType=vpc-endpoint,Tags=[{Key=Name,Value=dev2-vpce-s3}]'
 
 #{
 #    "VpcEndpoint": {
-#        "VpcEndpointId": "vpce-0576cb44998524c8e",
+#        "VpcEndpointId": "vpce-0a713bd081adf255e",
 #        "VpcEndpointType": "Gateway",
 #        "VpcId": "vpc-02645ba38f23e937d",
 #        "ServiceName": "com.amazonaws.us-east-2.s3",
@@ -54,7 +92,13 @@ aws ec2 create-vpc-endpoint --vpc-id vpc-02645ba38f23e937d --service-name com.am
 #        "RequesterManaged": false,
 #        "NetworkInterfaceIds": [],
 #        "DnsEntries": [],
-#        "CreationTimestamp": "2023-03-10T16:53:51+00:00",
+#        "CreationTimestamp": "2023-03-10T19:58:39+00:00",
+#        "Tags": [
+#            {
+#                "Key": "Name",
+#                "Value": "dev2-vpce-s3"
+#            }
+#        ],
 #        "OwnerId": "980075630834"
 #    }
 #}
@@ -118,7 +162,7 @@ aws ec2 create-subnet --vpc-id vpc-02645ba38f23e937d --cidr-block 11.0.0.0/20 --
 
 #Subnet creation call - this will be my private subnet
 
-#aws ec2 create-subnet --vpc-id vpc-02645ba38f23e937d --cidr-block 11.0.128.0/20 --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=dev2-subnet-private1-us-east-2a}]'
+aws ec2 create-subnet --vpc-id vpc-02645ba38f23e937d --cidr-block 11.0.128.0/20 --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=dev2-subnet-private1-us-east-2a}]'
 
 #   "Subnet": {
 #        "AvailabilityZone": "us-east-2a",
@@ -175,7 +219,10 @@ aws ec2 attach-internet-gateway --internet-gateway-id igw-0cad51f0b9945cbf4 --vp
 #NO RESPONSE from output of command above!
 
 #Create a route table to be used by the public subnet
-aws ec2 create-route-table --vpc-id vpc-02645ba38f23e937d
+aws ec2 create-route-table --vpc-id vpc-02645ba38f23e937d --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=dev2-rtb-public}]'
+
+# I forgot to include the name tag originally, so I ran this command after the object creation to give it a name
+#aws ec2 create-tags --resources rtb-0d1d7b6f7219a66bb --tags Key=Name,Value=dev2-rtb-public
 
 #{
 #    "RouteTable": {
@@ -215,7 +262,10 @@ aws ec2 associate-route-table --route-table-id rtb-0d1d7b6f7219a66bb --subnet-id
 #}
 
 #Create a route table to be used by the private subnet
-aws ec2 create-route-table --vpc-id vpc-02645ba38f23e937d
+aws ec2 create-route-table --vpc-id vpc-02645ba38f23e937d --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=dev2-rtb-private1-us-east-2a}]'
+
+# I forgot to include the name tag originally, so I ran this command after the object creation to give it a name
+#aws ec2 create-tags --resources rtb-02999a7044e057013 --tags Key=Name,Value=dev2-rtb-private1-us-east-2a
 
 #{
 #    "RouteTable": {
@@ -245,3 +295,13 @@ aws ec2 associate-route-table --route-table-id rtb-02999a7044e057013 --subnet-id
 #        "State": "associated"
 #    }
 #}
+
+#Associate the S3 Endpoint with the private subnet route table (the reset policy was just in the example so I kept it.)
+aws ec2 modify-vpc-endpoint --vpc-endpoint-id vpce-0a713bd081adf255e --add-route-table-ids rtb-02999a7044e057013 --reset-policy
+{
+    "Return": true
+}
+
+
+
+
