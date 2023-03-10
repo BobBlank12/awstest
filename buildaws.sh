@@ -150,3 +150,20 @@ aws ec2 create-subnet --vpc-id vpc-02645ba38f23e937d --cidr-block 11.0.0.0/20 --
 #    }
 #}
 
+#Create the internet gateway
+aws ec2 create-internet-gateway --tag-specifications 'ResourceType=internet-gateway,Tags=[{Key=Name,Value=dev2-igw}]'
+
+#{
+#    "InternetGateway": {
+#        "Attachments": [],
+#        "InternetGatewayId": "igw-0cad51f0b9945cbf4",
+#        "OwnerId": "980075630834",
+#        "Tags": [
+#            {
+#                "Key": "Name",
+#                "Value": "dev2-igw"
+#            }
+#        ]
+#    }
+#}
+
