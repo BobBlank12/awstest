@@ -19,7 +19,7 @@ def run_awscli_command(command,description):
 
 def run_awscli_command_no_response(command,description):
     print(f"{description}")
-    print(f"\tNow running: {command}")
+    print(f"\tNow running: {command}\n")
     os.popen(command).read()
     return "done"
 
@@ -37,7 +37,6 @@ response = run_awscli_command(command,"Creating a new VPC with a prefix of " + v
 
 # Capture the new VPC ID
 vpc_id = (read_json_value_from_response(response,'Vpc','VpcId'))
-
 
 #Get the main route table for the new VPC so we can tag it with a name
 command = 'aws ec2 describe-route-tables --filters "Name=association.main,Values=true" "Name=vpc-id,Values=' + vpc_id + '"'
@@ -125,5 +124,6 @@ print(f"Internet Gateway ID: {igw_id}")
 print(f"S3 Endpoint ID: {s3_endpoint_id}")
 print(f"Public subnet route table ID: {pub_route_table_id}")
 print(f"Private subnet route table ID: {private_route_table_id}")
-
+print(f"Public subnet ID: {pub_subnet_id}")
+print(f"Private subnet ID: {private_subnet_id}")
 print(f"All done!")
