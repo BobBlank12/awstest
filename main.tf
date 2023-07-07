@@ -20,19 +20,20 @@ resource "aws_default_route_table" "default-route-table" {
   }
 }
 
-// Create the public subnet
+// Create the public subnet(s)
 resource "aws_subnet" "vpc_public_subnet" {
-  vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = "${var.pub_cidr_block}"
+  count                = length(var.availability_zones)
+  vpc_id               = aws_vpc.vpc.id
+  cidr_block           = var.pub_cidr_blocks[count.index]
+  availability_zone    = var.availability_zones[count.index]
   map_public_ip_on_launch = true
-  availability_zone       = "${var.availability_zone}"
 
   tags = {
-    Name = "${var.vpc_prefix}-public-subnet"
+    Name = "${var.vpc_prefix}-public-subnet-${var.availability_zones[count.index]}"
   }
 }
 
-// Create the internet gateway for the public subnet
+// Create the internet gateway for the public subnet(s)
 resource "aws_internet_gateway" "vpc_igw" {
   vpc_id = aws_vpc.vpc.id
 
@@ -57,47 +58,57 @@ resource "aws_route" "vpc_public_sub_to_igw_route" {
   gateway_id             = aws_internet_gateway.vpc_igw.id
 }
 
-// Associate the public route table to the public subnet
+// Associate the public route table to the public subnet(s)
 resource "aws_route_table_association" "vpc_public_route_table_assn" {
-  subnet_id      = aws_subnet.vpc_public_subnet.id
+  count          = length(var.availability_zones)
+  subnet_id      = aws_subnet.vpc_public_subnet[count.index].id
   route_table_id = aws_route_table.vpc_public_route_table.id
 }
 
-// Create the private subnet
+// Create the private subnet(s)
 resource "aws_subnet" "vpc_private_subnet" {
+  count                = length(var.availability_zones)
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = "${var.pri_cidr_block}"
-  availability_zone       = "${var.availability_zone}"
+  cidr_block              = var.pri_cidr_blocks[count.index]
+  availability_zone       = var.availability_zones[count.index]
 
   tags = {
-    Name = "${var.vpc_prefix}-private-subnet"
+    Name = "${var.vpc_prefix}-private-subnet-${var.availability_zones[count.index]}"
   }
 }
 
-// Create private route table
+// Create private route table(s)
 resource "aws_route_table" "vpc_private_route_table" {
+  count  = length(var.availability_zones)
   vpc_id = aws_vpc.vpc.id
-
+  
   tags = {
-    Name = "${var.vpc_prefix}-private-rtb"
+    Name = "${var.vpc_prefix}-private-rtb-${var.availability_zones[count.index]}"
   }
 }
 
-// Associate the private route table to the private subnet
+// Associate the private route table(s) to the private subnet(s)
 resource "aws_route_table_association" "vpc_private_route_table_assn" {
-  subnet_id      = aws_subnet.vpc_private_subnet.id
-  route_table_id = aws_route_table.vpc_private_route_table.id
+  count  = length(var.availability_zones)
+  subnet_id      = aws_subnet.vpc_private_subnet[count.index].id
+  route_table_id = aws_route_table.vpc_private_route_table[count.index].id
 }
 
-# Create an S3 Endpoint and associate it with the private route table.
+# Create an S3 Endpoint and associate it with the private route table(s).
 resource "aws_vpc_endpoint" "s3_endpoint" {
   vpc_id          = aws_vpc.vpc.id
-  service_name    = "${var.s3_service_name}"
-  route_table_ids  = [aws_route_table.vpc_private_route_table.id]
+  service_name    = var.s3_service_name
 
   tags = {
-    Name = "${var.vpc_prefix}-vpce-s3"
+    Name = "${var.vpc_prefix}-vpc-ep-s3"
   }
+}
+
+# Associate the S3 endpoint with the private route table(s).
+resource "aws_vpc_endpoint_route_table_association" "s3_endpoint_association" {
+  count  = length(var.availability_zones)
+  vpc_endpoint_id = aws_vpc_endpoint.s3_endpoint.id
+  route_table_id  = aws_route_table.vpc_private_route_table[count.index].id
 }
 
 // Create a security group giving my IP access
@@ -131,14 +142,16 @@ resource "aws_key_pair" "aws_terraform_key" {
   public_key = file("~/.ssh/aws_terraform.key.pub")
 }
 
+
 resource "aws_instance" "ubuntu_22_04_ami_node" {
   // AMI from datasources.tf
   // This userdata installs docker on the host
+  count  = length(var.availability_zones)
   ami                    = data.aws_ami.ubuntu_22_04_ami.id
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.aws_terraform_key.id
   vpc_security_group_ids = [aws_security_group.vpc_sg.id]
-  subnet_id              = aws_subnet.vpc_public_subnet.id
+  subnet_id              = aws_subnet.vpc_public_subnet[count.index].id
   user_data              = file("userdata.tpl") 
 
   root_block_device {
@@ -151,4 +164,5 @@ resource "aws_instance" "ubuntu_22_04_ami_node" {
   }
 
 }
+
 
