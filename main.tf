@@ -1,4 +1,5 @@
-// Terrform to create AWS VPC's
+// Terrform to create an AWS VPC
+// See: https://github.com/BobBlank12/awstest/blob/main/README.md
 
 // Create the VPC
 resource "aws_vpc" "vpc" {
