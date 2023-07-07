@@ -27,3 +27,8 @@ variable "pri_cidr_block" {
     type = string
     default = "10.123.1.0/24"
 }
+
+// This is set as an environment variable on my localhost: TF_VAR_my_internet_ip
+variable "my_internet_ip" {
+    type = string
+}

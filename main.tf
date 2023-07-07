@@ -100,4 +100,55 @@ resource "aws_vpc_endpoint" "s3_endpoint" {
   }
 }
 
+// Create a security group giving my IP access
+resource "aws_security_group" "vpc_sg" {
+  name        = "${var.vpc_prefix}-vpc-sg"
+  description = "${var.vpc_prefix}-vpc-sg"
+  vpc_id      = aws_vpc.vpc.id
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["${var.my_internet_ip}/32"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.vpc_prefix}-vpc-sg"
+  }
+}
+
+// Use my AWS Terraform Key for auth
+resource "aws_key_pair" "aws_terraform_key" {
+  key_name   = "aws_terraform_key"
+  public_key = file("~/.ssh/aws_terraform.key.pub")
+}
+
+resource "aws_instance" "ubuntu_22_04_ami_node" {
+  // AMI from datasources.tf
+  // This userdata installs docker on the host
+  ami                    = data.aws_ami.ubuntu_22_04_ami.id
+  instance_type          = "t2.micro"
+  key_name               = aws_key_pair.aws_terraform_key.id
+  vpc_security_group_ids = [aws_security_group.vpc_sg.id]
+  subnet_id              = aws_subnet.vpc_public_subnet.id
+  user_data              = file("userdata.tpl") 
+
+  root_block_device {
+    #Still in free tier but larger than the default 8.
+    volume_size = 10
+  }
+
+  tags = {
+    Name = "ubuntu_22_04_ami_node"
+  }
+
+}
 
