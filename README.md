@@ -11,7 +11,7 @@
 - It will output the Public IPs of the hosts at the end of the build for you
 - You will have to create a key pair to SSH into the nodes if you want and update the name of the key in the code.  I'm sure you can find it.
 - You will have to export an environment variable called TF_VAR_my_internet_ip=<your internet IP> if you want the security group to work properly
-- You can control the number of AZs and CIDR blocks by modifying the values in variables.tf
+- You can control the number of AZs and CIDR blocks by modifying the values in **terraform.tfvars**
 
 Thanks to [Derek Morgan and his YouTube video](https://youtu.be/iRaai1IBlB0) that taught me the Terraform basics.
 
